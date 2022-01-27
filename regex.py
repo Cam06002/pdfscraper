@@ -1,0 +1,40 @@
+import re
+import pyperclip
+
+
+class Contact:
+
+    phoneRegex = re.compile(r'''(
+            (\d{3}|\(\d{3}\))? #first three digits or area code if provided
+            (\s|-|\.)? # space, dash, or period, if provided
+            (\d{3}) # next three digits
+            (\s|-|\.)? # space, dash, or period, if provided
+            (\d{4}) # last four digits
+            (\s*(ext|x|ext.)\s*(\d{2,5}))? # extenstion, if provided
+        )''', re.VERBOSE)
+
+    emailRegex = re.compile(r'''(
+        [a-zA-Z0-9._%+-]+ # username
+        @
+        [a-zA-Z0-9.-]+ # domain name
+        (\.[a-zA-Z]{2,4}) # ending
+    )''', re.VERBOSE)
+
+    text = str(pyperclip.paste())
+    matches = []
+    for groups in phoneRegex.findall(text):
+        phoneNum = '-'.join([groups[1], groups[3], groups[5]])
+        if groups[8] != '':
+            phoneNum += ' x' + groups[8]
+
+        matches.append(phoneNum)
+
+    for groups in emailRegex.findall(text):
+        matches.append(groups[0])
+
+    if len(matches) > 0:
+        print('Copied to clipboard: ')
+        print('\n'.join(matches))
+
+    else:
+        print('No phone numbers or email addresses found.')
